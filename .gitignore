@@ -1,0 +1,8 @@
+# Derleme çıktıları (içlerinde derleyen bilgisayarın klasör yolları bulunur)
+bin/
+obj/
+dist/
+publish/
+*.pdb
+*.user
+.vs/

@@ -1,0 +1,31 @@
+# "v1.2.3" biçiminde bir etiket gönderildiğinde exe'yi derler ve GitHub Releases'a yükler.
+name: Sürüm yayınla
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Derle
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          dotnet publish EkranGecis/EkranGecis.csproj -c Release -o dist -p:Version=$version
+
+      - name: Sürümü oluştur
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" dist/EkranGecis.exe --title "EkranGeçiş ${{ github.ref_name }}" --generate-notes
