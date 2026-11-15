@@ -7,21 +7,19 @@ enum Mode { Unknown, Pc, Switch }
 /// <summary>Uygulamanın ana mantığı: tepsi simgesi, kısayollar, mod geçişleri ve izleme.</summary>
 sealed class TrayApp : ApplicationContext
 {
-    const int HkPc = 1, HkSwitch = 2, HkToggle = 3;
+    const int HkPc = 1, HkSwitch = 2, HkToggle = 3, HkSounds = 4;
     const uint NoValue = uint.MaxValue;
 
     AppSettings settings;
     readonly NotifyIcon tray;
     readonly ContextMenuStrip menu = Menus.Create();
-    readonly ToolStripMenuItem statusItem, pcItem, swItem;
+    readonly ToolStripMenuItem statusItem, pcItem, swItem, soundsItem;
     readonly HotkeyManager hotkeys = new();
-    readonly MiniPanel panel = new();
-    readonly Osd osd = new();
+    MiniPanel panel;
+    Osd osd;
     readonly Control ui = new();
     readonly System.Windows.Forms.Timer poll = new() { Interval = 3000 };
-    readonly Icon iconPc = IconFactory.Make(Theme.Pc);
-    readonly Icon iconSw = IconFactory.Make(Theme.Switch);
-    readonly Icon iconUnknown = IconFactory.Make(Theme.Unknown);
+    Icon iconPc, iconSw, iconUnknown;
 
     Mode mode = Mode.Unknown;
     uint? lastInput;
@@ -39,6 +37,7 @@ sealed class TrayApp : ApplicationContext
         _ = ui.Handle; // UI iş parçacığına geri dönmek için
         settings = AppSettings.Load();
         bool firstRun = !AppSettings.Exists;
+        ApplyLook();
 
         statusItem = new ToolStripMenuItem("Durum: algılanıyor…") { Enabled = false };
         pcItem = new ToolStripMenuItem("Bilgisayar", null, (_, _) => Go(Mode.Pc, true));
@@ -50,14 +49,21 @@ sealed class TrayApp : ApplicationContext
             pcItem,
             swItem,
             new ToolStripSeparator(),
+            soundsItem = new ToolStripMenuItem("Efekt sesleri", null, (_, _) => ToggleSounds()),
             new ToolStripMenuItem("Ayarlar…", null, (_, _) => OpenSettings()),
             new ToolStripMenuItem("Çıkış", null, (_, _) => Exit()),
         });
 
         tray = new NotifyIcon { Icon = iconUnknown, Text = "EkranGeçiş", ContextMenuStrip = menu, Visible = true };
         tray.MouseClick += (_, e) => { if (e.Button == MouseButtons.Left) ShowTrayMenu(); };
-        panel.ContextMenuStrip = menu;
-        panel.BackToPc += () => Go(Mode.Pc, true);
+
+        // Açılış ekranı (Windows açılırken kendiliğinden başlatıldıysa gösterilmez)
+        bool splash = !autostart && !firstRun && settings.ShowSplash;
+        if (splash)
+        {
+            new Splash().ShowOn(CursorScreen());
+            Sfx.Play(Sound.Acilis);
+        }
 
         hotkeys.Pressed += OnHotkey;
         RegisterHotkeys();
@@ -89,7 +95,7 @@ sealed class TrayApp : ApplicationContext
                 osd.Flash(CursorScreen(), "EkranGeçiş çalışıyor. Simgesi görev çubuğunun sağ köşesinde.", Theme.Pc, 4000);
                 OpenSettings();
             }
-            else if (!autostart && v != NoValue)
+            else if (!autostart && !splash && v != NoValue)
             {
                 osd.Flash(CursorScreen(),
                     "EkranGeçiş çalışıyor.  " + settings.DeviceName + ": " + settings.HotkeySwitch + "   •   Bilgisayar: " + settings.HotkeyPc,
@@ -112,7 +118,19 @@ sealed class TrayApp : ApplicationContext
             case HkPc: Go(Mode.Pc, true); break;
             case HkSwitch: Go(Mode.Switch, true); break;
             case HkToggle: Go(mode == Mode.Switch ? Mode.Pc : Mode.Switch, true); break;
+            case HkSounds: ToggleSounds(); break;
         }
+    }
+
+    /// <summary>Efekt seslerini açıp kapatır (kısayol ya da tepsi menüsünden).</summary>
+    void ToggleSounds()
+    {
+        settings.SoundsEnabled = !settings.SoundsEnabled;
+        try { settings.Save(); } catch { }
+        ApplyLook(recreate: false);
+        UpdateUi();
+        if (settings.SoundsEnabled) Sfx.Play(Sound.OtomatikDonus);
+        osd.Flash(VisibleScreen(), settings.SoundsEnabled ? "Efekt sesleri açık" : "Efekt sesleri kapalı", Theme.Pc, 1600);
     }
 
     /// <summary>
@@ -157,10 +175,13 @@ sealed class TrayApp : ApplicationContext
             Volatile.Write(ref busy, 0);
             if (!r.Ok)
             {
+                Sfx.Play(Sound.Hata);
                 osd.Flash(CursorScreen(), r.Warn, Theme.Switch, 4500);
             }
             else
             {
+                if (mode != target || sendDdc)
+                    Sfx.Play(target == Mode.Switch ? Sound.KonsolaGecis : sendDdc ? Sound.BilgisayaraDonus : Sound.OtomatikDonus);
                 mode = target;
                 lastInput = target == Mode.Switch ? s.SwitchInput : s.PcInput;
                 UpdateUi();
@@ -285,6 +306,8 @@ sealed class TrayApp : ApplicationContext
         swItem.Checked = mode == Mode.Switch;
         pcItem.ShortcutKeyDisplayString = settings.HotkeyPc.IsEmpty ? null : settings.HotkeyPc.ToString();
         swItem.ShortcutKeyDisplayString = settings.HotkeySwitch.IsEmpty ? null : settings.HotkeySwitch.ToString();
+        soundsItem.Checked = settings.SoundsEnabled;
+        soundsItem.ShortcutKeyDisplayString = settings.HotkeySounds.IsEmpty ? null : settings.HotkeySounds.ToString();
     }
 
     void UpdatePanel()
@@ -325,6 +348,7 @@ sealed class TrayApp : ApplicationContext
         if (!hotkeys.Register(HkPc, settings.HotkeyPc)) failed.Add(settings.HotkeyPc.ToString());
         if (!hotkeys.Register(HkSwitch, settings.HotkeySwitch)) failed.Add(settings.HotkeySwitch.ToString());
         if (!hotkeys.Register(HkToggle, settings.HotkeyToggle)) failed.Add(settings.HotkeyToggle.ToString());
+        if (!hotkeys.Register(HkSounds, settings.HotkeySounds)) failed.Add(settings.HotkeySounds.ToString());
         if (failed.Count > 0)
             osd.Flash(CursorScreen(), "Bu kısayollar başka bir program tarafından kullanılıyor: " +
                       string.Join(", ", failed) + ". Ayarlardan değiştirebilirsiniz.", Theme.Switch, 6000);
@@ -343,8 +367,15 @@ sealed class TrayApp : ApplicationContext
             openSettings = f;
             if (f.ShowDialog() == DialogResult.OK && f.Result != null)
             {
+                bool themeChanged = f.Result.Theme != settings.Theme;
                 settings = f.Result;
                 settings.Save();
+                if (themeChanged)
+                {
+                    panel.Close();
+                    osd.Close();
+                }
+                ApplyLook(recreate: themeChanged);
             }
             openSettings = null;
         }
@@ -353,6 +384,23 @@ sealed class TrayApp : ApplicationContext
         if (lastInput.HasValue && mode == Mode.Unknown) mode = Classify(lastInput.Value);
         UpdateUi();
         UpdatePanel();
+    }
+
+    /// <summary>Temayı, simgeleri, ses ayarlarını uygular; tema değiştiyse panelleri yeniden oluşturur.</summary>
+    void ApplyLook(bool recreate = true)
+    {
+        Sfx.Enabled = settings.SoundsEnabled;
+        Sfx.Volume = settings.SoundVolume;
+        if (!recreate) return;
+        Pal.Apply(settings.Theme);
+        iconPc = IconFactory.Make(Theme.Pc);
+        iconSw = IconFactory.Make(Theme.Switch);
+        iconUnknown = IconFactory.Make(Theme.Unknown);
+        menu.BackColor = Pal.Surface;
+        menu.ForeColor = Pal.Text;
+        panel = new MiniPanel { ContextMenuStrip = menu };
+        panel.BackToPc += () => Go(Mode.Pc, true);
+        osd = new Osd();
     }
 
     void Exit()
@@ -380,4 +428,5 @@ sealed class TrayApp : ApplicationContext
         });
     }
 }
+
 

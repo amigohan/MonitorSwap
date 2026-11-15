@@ -8,25 +8,54 @@ namespace EkranGecis;
 //  Tasarım belirteçleri: renkler, yazı tipleri, ikonlar
 // =====================================================================
 
-/// <summary>Koyu tema renk paleti. Metin renkleri koyu yüzeylerde en az 7:1 kontrast verir.</summary>
+/// <summary>
+/// Renk paleti. İki tema var: "Macera" (orman yeşili, altın) ve "Koyu" (nötr gri).
+/// Metin renkleri her iki temada da yüzeylerin üstünde en az 7:1 kontrast verir.
+/// Tema uygulama açılırken ya da ayarlar kaydedilince <see cref="Apply"/> ile seçilir.
+/// </summary>
 static class Pal
 {
-    public static readonly Color Bg = C(0x131418);
-    public static readonly Color Sidebar = C(0x17181D);
-    public static readonly Color Surface = C(0x1E2026);
-    public static readonly Color SurfaceHi = C(0x272A32);
-    public static readonly Color Hover = C(0x30333C);
-    public static readonly Color Pressed = C(0x383C46);
-    public static readonly Color Border = C(0x2B2E36);
-    public static readonly Color BorderHi = C(0x3B3F4A);
-    public static readonly Color Text = C(0xECEEF3);
-    public static readonly Color TextDim = C(0xA9AEBB);
-    public static readonly Color TextMuted = C(0x7A7F8C);
-    public static readonly Color Accent = C(0x5B8DEF);
-    public static readonly Color Switch = C(0xEF5464);
-    public static readonly Color Success = C(0x45C98C);
-    public static readonly Color Warning = C(0xE9B44C);
-    public static readonly Color Neutral = C(0x8A8F9C);
+    public static Color Bg, Sidebar, Surface, SurfaceHi, Hover, Pressed, Border, BorderHi;
+    public static Color Text, TextDim, TextMuted;
+    /// <summary>Butonlar, açık anahtarlar, odak halkası.</summary>
+    public static Color Accent;
+    /// <summary>Accent zemin üstündeki yazı rengi.</summary>
+    public static Color OnAccent;
+    /// <summary>Bilgisayar modunun rengi.</summary>
+    public static Color Pc;
+    /// <summary>Konsol modunun rengi.</summary>
+    public static Color Switch;
+    public static Color Success, Warning, Neutral;
+    /// <summary>Macera temasında süslemelerde kullanılan altın.</summary>
+    public static Color Gold, GoldDim;
+    public static bool Adventure { get; private set; }
+
+    static Pal() => Apply("Macera");
+
+    public static void Apply(string theme)
+    {
+        Adventure = theme != "Koyu";
+        if (Adventure)
+        {
+            Bg = C(0x132019); Sidebar = C(0x0F1913); Surface = C(0x1A2A20); SurfaceHi = C(0x23362A);
+            Hover = C(0x2B4033); Pressed = C(0x33493B); Border = C(0x2E4434); BorderHi = C(0x45603F);
+            Text = C(0xF1E8D0); TextDim = C(0xC4BA9C); TextMuted = C(0x8E8870);
+            Accent = C(0xD4A443); OnAccent = C(0x1C1406);
+            Pc = C(0x4F86C6); Switch = C(0xC8434F);
+            Success = C(0x62C9A2); Warning = C(0xE9B44C); Neutral = C(0x8E8870);
+            Gold = C(0xE2BD6A); GoldDim = C(0x8C6E30);
+        }
+        else
+        {
+            Bg = C(0x131418); Sidebar = C(0x17181D); Surface = C(0x1E2026); SurfaceHi = C(0x272A32);
+            Hover = C(0x30333C); Pressed = C(0x383C46); Border = C(0x2B2E36); BorderHi = C(0x3B3F4A);
+            Text = C(0xECEEF3); TextDim = C(0xA9AEBB); TextMuted = C(0x7A7F8C);
+            Accent = C(0x5B8DEF); OnAccent = Color.White;
+            Pc = C(0x5B8DEF); Switch = C(0xEF5464);
+            Success = C(0x45C98C); Warning = C(0xE9B44C); Neutral = C(0x8A8F9C);
+            Gold = C(0xE2BD6A); GoldDim = C(0x8C6E30);
+        }
+    }
 
     public static Color C(int rgb) => Color.FromArgb(255, (rgb >> 16) & 255, (rgb >> 8) & 255, rgb & 255);
 
@@ -50,7 +79,7 @@ static class Fonts
 
     public static readonly string Text = Pick("Segoe UI Variable Text", "Segoe UI");
     public static readonly string TextSemi = Pick("Segoe UI Variable Text Semibold", "Segoe UI Semibold");
-    public static readonly string Display = Pick("Segoe UI Variable Display Semib", "Segoe UI Semibold");
+    public static readonly string DisplayFamily = Pick("Segoe UI Variable Display Semib", "Segoe UI Semibold");
     public static readonly string Icons = Pick("Segoe Fluent Icons", "Segoe MDL2 Assets");
 
     static readonly Dictionary<(string, float, int), Font> Cache = new();
@@ -59,16 +88,47 @@ static class Fonts
     {
         var key = (family, pt, dpi);
         if (!Cache.TryGetValue(key, out var f))
-            Cache[key] = f = new Font(family, pt * dpi / 72f, FontStyle.Regular, GraphicsUnit.Pixel);
+        {
+            var ff = family == AdventureName && adventureFamily != null ? adventureFamily : new FontFamily(family);
+            Cache[key] = f = new Font(ff, pt * dpi / 72f, FontStyle.Regular, GraphicsUnit.Pixel);
+        }
         return f;
     }
+
+    // ---- Macera teması başlık fontu (uygulamanın içine gömülü, SIL Open Font License) ----
+    const string AdventureName = "@macera";
+    static FontFamily adventureFamily;
+    static readonly PrivateFontCollection Private = new();
+    [DllImport("gdi32.dll")] static extern IntPtr AddFontMemResourceEx(IntPtr pb, uint cb, IntPtr pdv, out uint pcFonts);
+
+    static Fonts()
+    {
+        try
+        {
+            using var s = typeof(Fonts).Assembly.GetManifestResourceStream("EkranGecis.Fonts.Almendra-Bold.ttf");
+            if (s == null) return;
+            var data = new byte[s.Length];
+            s.ReadExactly(data);
+            IntPtr mem = Marshal.AllocCoTaskMem(data.Length); // uygulama açık kaldıkça bellekte durmalı
+            Marshal.Copy(data, 0, mem, data.Length);
+            Private.AddMemoryFont(mem, data.Length);           // GDI+ için
+            AddFontMemResourceEx(mem, (uint)data.Length, IntPtr.Zero, out _); // GDI (TextRenderer) için
+            adventureFamily = Private.Families.FirstOrDefault();
+        }
+        catch { adventureFamily = null; }
+    }
+
+    /// <summary>Başlıklarda kullanılan font: macera temasında Almendra, koyu temada Segoe UI Variable Display.</summary>
+    static string Heading => Pal.Adventure && adventureFamily != null ? AdventureName : DisplayFamily;
+    static float HeadingScale => Pal.Adventure && adventureFamily != null ? 1.08f : 1f;
 
     public static Font Body(int dpi) => Get(Text, 10.5f, dpi);
     public static Font BodySemi(int dpi) => Get(TextSemi, 10.5f, dpi);
     public static Font Caption(int dpi) => Get(Text, 9.25f, dpi);
     public static Font CaptionSemi(int dpi) => Get(TextSemi, 9f, dpi);
-    public static Font Subtitle(int dpi) => Get(TextSemi, 13f, dpi);
-    public static Font Title(int dpi) => Get(Display, 20f, dpi);
+    public static Font Subtitle(int dpi) => Pal.Adventure && adventureFamily != null ? Get(AdventureName, 13.5f, dpi) : Get(TextSemi, 13f, dpi);
+    public static Font Title(int dpi) => Get(Heading, 20f * HeadingScale, dpi);
+    public static Font Display(float pt, int dpi) => Get(Heading, pt * HeadingScale, dpi);
     public static Font Icon(float pt, int dpi) => Get(Icons, pt, dpi);
 }
 
@@ -535,6 +595,93 @@ sealed class Picker : DControl, IPreferred
     }
 }
 
+/// <summary>0–100 arası kaydırıcı.</summary>
+sealed class Slider : DControl
+{
+    int value = 70;
+    bool dragging;
+    public event EventHandler ValueChanged;
+
+    public Slider()
+    {
+        SetStyle(ControlStyles.Selectable, true);
+        TabStop = true;
+        Cursor = Cursors.Hand;
+    }
+
+    public int Value
+    {
+        get => value;
+        set
+        {
+            value = Math.Clamp(value, 0, 100);
+            if (this.value == value) return;
+            this.value = value;
+            Invalidate();
+            ValueChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    int Pad => S(9);
+    int FromX(int x) => (int)Math.Round((x - Pad) * 100.0 / Math.Max(1, Width - Pad * 2));
+
+    protected override void OnMouseDown(MouseEventArgs e) { base.OnMouseDown(e); if (e.Button == MouseButtons.Left && Enabled) { Focus(); dragging = true; Value = FromX(e.X); } }
+    protected override void OnMouseMove(MouseEventArgs e) { base.OnMouseMove(e); if (dragging) Value = FromX(e.X); }
+    protected override void OnMouseUp(MouseEventArgs e) { base.OnMouseUp(e); dragging = false; }
+    protected override bool IsInputKey(Keys k) => k is Keys.Left or Keys.Right || base.IsInputKey(k);
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+        base.OnKeyDown(e);
+        if (e.KeyCode == Keys.Left) Value -= 5;
+        if (e.KeyCode == Keys.Right) Value += 5;
+    }
+
+    protected override void Render(Graphics g)
+    {
+        int pad = Pad, cy = Height / 2;
+        float x = pad + (Width - pad * 2) * value / 100f;
+        Draw.Fill(g, En(Pal.SurfaceHi), new RectangleF(pad, cy - Sf(3), Width - pad * 2, Sf(6)), Sf(3));
+        Draw.Fill(g, En(Pal.Accent), new RectangleF(pad, cy - Sf(3), x - pad, Sf(6)), Sf(3));
+        float r = Sf(8);
+        Draw.Fill(g, En(hover || dragging ? Pal.Lighten(Pal.Accent, 0.25f) : Pal.Lighten(Pal.Accent, 0.12f)), new RectangleF(x - r, cy - r, r * 2, r * 2), r);
+        Draw.Stroke(g, En(Pal.Surface), new RectangleF(x - r, cy - r, r * 2, r * 2), r, Sf(2));
+        if (Focused && ShowFocusCues) Draw.Stroke(g, Pal.Lighten(Pal.Accent, 0.3f), new RectangleF(x - r - 2, cy - r - 2, r * 2 + 4, r * 2 + 4), r + 2, 1.5f);
+    }
+}
+
+/// <summary>Ses seviyesi kaydırıcısı, yanında yüzde ve "Dinle" butonu.</summary>
+sealed class VolumeEditor : DControl, IPreferred
+{
+    public readonly Slider Slider = new();
+    public readonly PillButton Test = new("Dinle", ButtonKind.Secondary, Glyph.Play);
+
+    public VolumeEditor()
+    {
+        Slider.BackColor = Pal.Surface;
+        Test.BackColor = Pal.Surface;
+        Controls.Add(Slider);
+        Controls.Add(Test);
+        Slider.ValueChanged += (_, _) => Invalidate();
+        EnabledChanged += (_, _) => { Slider.Enabled = Enabled; Test.Enabled = Enabled; };
+    }
+
+    public Size Preferred => new(S(320), S(38));
+
+    protected override void OnLayout(LayoutEventArgs e)
+    {
+        base.OnLayout(e);
+        var tp = Test.Preferred;
+        Test.SetBounds(Width - tp.Width, (Height - tp.Height) / 2, tp.Width, tp.Height);
+        Slider.SetBounds(0, (Height - S(26)) / 2, Test.Left - S(56), S(26));
+    }
+
+    protected override void Render(Graphics g)
+    {
+        Draw.Text(g, "%" + Slider.Value, Fonts.Body(DeviceDpi), new Rectangle(Slider.Right + S(4), 0, S(46), Height), En(Pal.TextDim),
+            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
+    }
+}
+
 /// <summary>Koyu, yuvarlak köşeli metin kutusu.</summary>
 sealed class TextField : DControl, IPreferred
 {
@@ -822,6 +969,7 @@ sealed class Card : DControl, IBlock
         var r = new RectangleF(0, 0, Width, Height);
         Draw.Fill(g, Pal.Surface, r, Sf(10));
         Draw.Stroke(g, Pal.Border, r, Sf(10));
+        Ornament.Corners(g, ClientRectangle, S(4), S(10), Sf(1.2f));
         using var pen = new Pen(Pal.Border, 1);
         for (int i = 0; i < rows.Count - 1; i++)
         {
@@ -915,8 +1063,9 @@ sealed class Page : DControl
         int pad = S(32), w = Width - pad * 2;
         var ft = Fonts.Title(DeviceDpi);
         int th = Draw.Measure(Title, ft).Height;
-        Draw.Text(g, Title, ft, new Rectangle(pad, S(30), w, th + S(2)), Pal.Text);
+        Draw.Text(g, Title, ft, new Rectangle(pad, S(30), w, th + S(2)), Pal.Adventure ? Pal.Gold : Pal.Text);
         Draw.Wrapped(g, Subtitle, Fonts.Body(DeviceDpi), new Rectangle(pad, S(30) + th + S(6), w, S(60)), Pal.TextDim);
+        if (Pal.Adventure) Ornament.Divider(g, pad, HeaderHeight(w) - S(11), w, DeviceDpi / 96f);
     }
 }
 
@@ -1004,3 +1153,4 @@ sealed class DarkMenuColors : ProfessionalColorTable
     public override Color CheckSelectedBackground => Pal.Hover;
     public override Color CheckPressedBackground => Pal.Hover;
 }
+

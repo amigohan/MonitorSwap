@@ -8,6 +8,7 @@ static class Program
     static void Main(string[] args)
     {
         ApplicationConfiguration.Initialize();
+        Pal.Apply(AppSettings.Load().Theme); // pencereler oluşmadan önce tema seçilsin
 
         // Geliştirme/teşhis komutları (normal kullanımda gerekmez).
         if (args.Length >= 2 && args[0] == "--render") { Render(args[1]); return; }
@@ -100,27 +101,34 @@ static class Program
             bmp.Save(Path.Combine(dir, name));
         }
         var s = AppSettings.Load();
-        using (var f = new SettingsForm(s))
+        foreach (var theme in new[] { "Koyu", "Macera" })
         {
-            f.StartPosition = FormStartPosition.Manual;
-            f.Location = new Point(-10000, -10000);
-            f.Show();
-            Wait(2500);
-            Capture(f, "ayarlar-monitor.png");
-            f.ShowPage(3);
-            Wait(400);
-            Capture(f, "ayarlar-kisayollar.png");
-            f.ShowPage(2);
-            Wait(400);
-            Capture(f, "ayarlar-pencereler.png");
-            f.Close();
+            Pal.Apply(theme);
+            string pre = theme == "Koyu" ? "" : "macera-";
+            var t = s.Clone();
+            t.Theme = theme;
+            using (var f = new SettingsForm(t))
+            {
+                f.StartPosition = FormStartPosition.Manual;
+                f.Location = new Point(-10000, -10000);
+                f.Show();
+                Wait(2500);
+                Capture(f, pre + "ayarlar-monitor.png");
+                f.ShowPage(3);
+                Wait(400);
+                Capture(f, pre + "ayarlar-kisayollar.png");
+                f.ShowPage(4);
+                Wait(400);
+                Capture(f, pre + "ayarlar-genel.png");
+                f.Close();
+            }
+            var p = new MiniPanel();
+            p.ShowOn(Screen.PrimaryScreen, s.HotkeyPc.ToString(), s.DeviceName);
+            p.Location = new Point(-10000, -10000);
+            Wait(500);
+            Capture(p, pre + "panel.png");
+            p.Close();
         }
-        var p = new MiniPanel();
-        p.ShowOn(Screen.PrimaryScreen, s.HotkeyPc.ToString(), s.DeviceName);
-        p.Location = new Point(-10000, -10000);
-        Wait(500);
-        Capture(p, "panel.png");
-        p.Close();
     }
 
     /// <summary>Ayarlar penceresi ve mini paneli PNG olarak kaydeder (görsel kontrol için).</summary>

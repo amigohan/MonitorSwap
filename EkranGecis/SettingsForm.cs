@@ -14,7 +14,10 @@ sealed class SettingsForm : Form
 
     // Kontroller
     List<uint> inputCodes = new();
-    readonly Segmented segPc = new("DisplayPort");
+    readonly Segmented segPc = new("DisplayPort") { SelectedColor = Pal.Pc };
+    readonly ToggleSwitch tglAdventure = new(), tglSplash = new(), tglSfx = new();
+    readonly HotkeyField hkSounds = new();
+    readonly VolumeEditor volume = new();
     readonly Segmented segSw = new("HDMI-1") { SelectedColor = Pal.Switch };
     readonly TextField txtName = new();
     readonly PillButton btnTest = new("Dene", ButtonKind.Secondary, Glyph.Play);
@@ -59,6 +62,14 @@ sealed class SettingsForm : Form
         btnTest.Click += async (_, _) => await TestSwitchInput();
         btnLog.Click += (_, _) => OpenLog();
         tglAudio.CheckedChanged += (_, _) => UpdateEnabled();
+        tglSfx.CheckedChanged += (_, _) => UpdateEnabled();
+        volume.Test.Click += (_, _) =>
+        {
+            bool e = Sfx.Enabled; int v = Sfx.Volume;
+            Sfx.Enabled = true; Sfx.Volume = volume.Slider.Value;
+            Sfx.Play(Sound.KonsolaGecis);
+            Sfx.Enabled = e; Sfx.Volume = v;
+        };
         UpdateEnabled();
 
         Shown += async (_, _) => await DetectMonitor();
@@ -101,11 +112,17 @@ sealed class SettingsForm : Form
         keys.Add(new Card(
             new SettingRow("Konsola geç", null, hkSw),
             new SettingRow("Bilgisayara dön", null, hkPc),
-            new SettingRow("İkisi arasında geçiş", null, hkToggle)));
+            new SettingRow("İkisi arasında geçiş", null, hkToggle),
+            new SettingRow("Efekt seslerini aç/kapat", null, hkSounds)));
         keys.Add(new Callout(CalloutKind.Info,
             "Türkçe klavyede Ctrl+Alt, AltGr ile aynıdır. Kısayola Shift eklemezsen #, $, { gibi karakterleri yazamayabilirsin."));
 
-        var general = new Page("Genel", "Uygulamanın kendisiyle ilgili ayarlar.", Glyph.Settings);
+        var general = new Page("Genel", "Görünüm, sesler ve uygulamanın kendisiyle ilgili ayarlar.", Glyph.Settings);
+        general.Add(new Card(
+            new SettingRow("Macera teması", "Yeşil-altın renkler, süslü çerçeveler ve altın başlıklar. Kaydedince tüm uygulamaya uygulanır.", tglAdventure),
+            new SettingRow("Açılış ekranı", "Uygulama başlarken logoyu kısa süre göster.", tglSplash),
+            new SettingRow("Efekt sesleri", "Geçişlerde kısa okarina sesleri çalsın.", tglSfx),
+            new SettingRow("Ses seviyesi", null, volume)));
         general.Add(new Card(
             new SettingRow("Windows ile başlat", "Oturum açınca simge görev çubuğuna kendiliğinden gelir.", tglAuto),
             new SettingRow("Kayıt dosyası", "Bir şey ters giderse ne olduğunu buradan görebilirsin.", btnLog),
@@ -125,7 +142,7 @@ sealed class SettingsForm : Form
 
     int S(float v) => (int)Math.Round(v * DeviceDpi / 96f);
 
-    void ApplySize() => ClientSize = new Size(S(880), S(660));
+    void ApplySize() => ClientSize = new Size(S(880), S(720));
 
     protected override void OnDpiChanged(DpiChangedEventArgs e)
     {
@@ -183,12 +200,18 @@ sealed class SettingsForm : Form
         hkPc.Value = s.HotkeyPc;
         hkSw.Value = s.HotkeySwitch;
         hkToggle.Value = s.HotkeyToggle;
+        tglAdventure.Checked = s.Theme == "Macera";
+        hkSounds.Value = s.HotkeySounds;
+        tglSplash.Checked = s.ShowSplash;
+        tglSfx.Checked = s.SoundsEnabled;
+        volume.Slider.Value = s.SoundVolume;
     }
 
     void UpdateEnabled()
     {
         picker.Enabled = tglAudio.Checked;
         tglRestore.Enabled = tglAudio.Checked;
+        volume.Enabled = tglSfx.Checked;
     }
 
     async Task DetectMonitor()
@@ -203,6 +226,7 @@ sealed class SettingsForm : Form
             }
             catch { return ((string)null, (List<uint>)null, (uint?)null); }
         });
+        if (IsDisposed || Disposing) return; // pencere algılama bitmeden kapandıysa
         if (inputs != null) SetInputs(inputs, SelectedPc, SelectedSw);
         status.SetInfo(model, input);
         sidebar.SetStatus(model);
@@ -227,6 +251,7 @@ sealed class SettingsForm : Form
             Thread.Sleep(5000);
             return Ddc.SetInput(pc);
         });
+        if (IsDisposed || Disposing) return;
         rowTest.DescriptionColor = ok ? Pal.Success : Pal.Warning;
         rowTest.Description = ok
             ? "Tamam. Konsolun görüntüsünü gördüysen doğru giriş seçili."
@@ -253,7 +278,7 @@ sealed class SettingsForm : Form
         uint pc = SelectedPc, sw = SelectedSw;
         if (pc == sw) { footer.ShowError("Bilgisayar ve konsol için farklı girişler seç."); ShowPage(0); return; }
 
-        var keys = new[] { hkPc.Value, hkSw.Value, hkToggle.Value }.Where(h => !h.IsEmpty).Select(h => h.ToString()).ToList();
+        var keys = new[] { hkPc.Value, hkSw.Value, hkToggle.Value, hkSounds.Value }.Where(h => !h.IsEmpty).Select(h => h.ToString()).ToList();
         if (keys.Count != keys.Distinct().Count()) { footer.ShowError("Aynı kısayol birden fazla işe atanmış."); ShowPage(3); return; }
 
         if (tglAudio.Checked && picker.SelectedId == null) { footer.ShowError("Konsol modu için bir ses cihazı seç."); ShowPage(1); return; }
@@ -273,6 +298,11 @@ sealed class SettingsForm : Form
         s.HotkeyPc = hkPc.Value;
         s.HotkeySwitch = hkSw.Value;
         s.HotkeyToggle = hkToggle.Value;
+        s.Theme = tglAdventure.Checked ? "Macera" : "Koyu";
+        s.HotkeySounds = hkSounds.Value;
+        s.ShowSplash = tglSplash.Checked;
+        s.SoundsEnabled = tglSfx.Checked;
+        s.SoundVolume = volume.Slider.Value;
         try { AppSettings.Autostart = tglAuto.Checked; } catch { }
 
         Result = s;
@@ -334,10 +364,8 @@ sealed class Sidebar : DControl
     protected override void Render(Graphics g)
     {
         // Logo
-        var logo = new RectangleF(S(22), S(26), S(38), S(38));
-        Draw.Fill(g, Pal.Mix(Pal.Sidebar, Pal.Accent, 0.18f), logo, Sf(10));
-        Draw.Icon(g, Glyph.Monitor, 14f, DeviceDpi, Rectangle.Round(logo), Pal.Lighten(Pal.Accent, 0.25f));
-        Draw.Text(g, "EkranGeçiş", Fonts.Subtitle(DeviceDpi), new Rectangle(S(72), S(24), Width - S(80), S(24)), Pal.Text);
+        IconFactory.DrawEmblem(g, new RectangleF(S(14), S(18), S(52), S(52)));
+        Draw.Text(g, "EkranGeçiş", Fonts.Subtitle(DeviceDpi), new Rectangle(S(72), S(22), Width - S(80), S(26)), Pal.Adventure ? Pal.Gold : Pal.Text);
 
         // Durum
         Color dot = detecting ? Pal.Neutral : model != null ? Pal.Success : Pal.Warning;
@@ -484,3 +512,4 @@ sealed class Footer : DControl
         }
     }
 }
+

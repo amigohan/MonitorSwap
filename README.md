@@ -1,66 +1,62 @@
 # EkranGeçiş
 
-Monitörünün girişini **tek tuşla** bilgisayar ile konsol (Nintendo Switch, PS5, Xbox…) arasında değiştiren küçük bir Windows uygulaması. Monitörün düğmelerine uzanmana gerek kalmaz.
+Laptopum monitöre DisplayPort ile bağlı, Switch de aynı monitörün HDMI girişinde. Her seferinde monitörün altındaki küçük düğmelere uzanıp menüde giriş aramaktan sıkıldım, bunu yazdım.
 
-Uygulama monitörle, zaten bağlı olan görüntü kablosu üzerinden **DDC/CI** ile konuşur. Ek donanım gerekmez.
+Bir kısayola basıyorsun, monitör konsola geçiyor. Bir daha basıyorsun, bilgisayara dönüyor. Monitörle zaten takılı olan görüntü kablosu üzerinden (DDC/CI) konuşuyor, ekstra bir şey gerekmiyor.
 
 <p align="center">
   <img src="docs/ayarlar-monitor.png" width="720" alt="Ayarlar penceresi">
 </p>
 
-## Özellikler
+## Ne yapıyor
 
-- **Kısayol tuşları:** `Ctrl+Alt+Shift+2` konsola, `Ctrl+Alt+Shift+1` bilgisayara geçirir. Kısayolları istediğin gibi değiştirebilirsin.
-- **Görev çubuğu simgesi:** Mavi = bilgisayar, kırmızı = konsol. Tıklayınca menü açılır.
-- **Pencereleri taşıma:** Konsola geçince ana monitördeki pencereler ikinci ekrana (ör. laptop ekranı) alınır, dönünce eski yerlerine konur.
-- **Kontrol paneli:** Konsol modunda ikinci ekranın köşesinde "Bilgisayara dön" paneli çıkar.
-- **Ses yönlendirme:** İstersen konsol modunda bilgisayarın sesi başka bir cihaza (ör. kulaklık) aktarılır, dönünce geri alınır.
-- **Otomatik algılama:** Konsolu kapatınca monitör kendiliğinden bilgisayara dönerse uygulama bunu fark eder ve pencereleri/sesi geri alır.
-- Kurulum gerektirmez, tek exe dosyası. İnternete bağlanmaz, hiçbir veri göndermez.
+- `Ctrl+Alt+Shift+2` konsola, `Ctrl+Alt+Shift+1` bilgisayara geçiriyor. İstersen değiştirebilirsin.
+- Konsola geçince ana monitördeki pencereleri laptop ekranına alıyor, dönünce eski yerlerine koyuyor. Böylece Discord falan gözünün önünde kalıyor.
+- Laptop ekranının köşesinde küçük bir "Bilgisayara dön" paneli çıkıyor.
+- Konsolu kapatınca monitör kendiliğinden bilgisayara dönerse bunu fark ediyor, pencereleri geri yerleştiriyor.
+- Geçişlerde kısa okarina sesleri çalıyor. Sesleri kendim ürettim; ayarlardan kısabilir ya da kapatabilirsin.
+- İstersen konsol modunda bilgisayarın sesini başka bir cihaza (kulaklık gibi) aktarıyor.
+- `Ctrl+Alt+Shift+M` efekt seslerini açıp kapatıyor; tepsi menüsünden de yapılabiliyor.
+- Varsayılan görünüm sade ve koyu. İstersen ayarlardan yeşil-altın, süslü bir "Macera" temasını açabilirsin.
 
 <p align="center">
-  <img src="docs/panel.png" width="316" alt="Konsol modundaki kontrol paneli">
+  <img src="docs/macera-ayarlar-genel.png" width="720" alt="Macera teması açıkken ayarlar">
 </p>
 
-## İndirme ve kurulum
+İnternete bağlanmıyor, hiçbir yere veri göndermiyor. Kurulum da yok, tek bir exe.
 
-1. [**Releases**](https://github.com/amigohan/EkranGecis/releases/latest) sayfasından `EkranGecis.exe` dosyasını indir.
-2. Kalıcı bir klasöre koy (ör. `Belgeler\EkranGecis`) ve çalıştır.
-3. Windows **"Windows bilgisayarınızı korudu"** uyarısı gösterirse **Ek bilgi → Yine de çalıştır**'a tıkla.
-   Bu uyarı, uygulama ücretli bir kod imzalama sertifikasıyla imzalanmadığı için çıkar.
-4. İlk açılışta ayarlar penceresi gelir. Bilgisayarın ve konsolun takılı olduğu girişleri seç, **Dene** ile kontrol et, **Kaydet**'e bas.
-5. İstersen **Genel → Windows ile başlat**'ı aç.
+<p align="center">
+  <img src="docs/panel.png" width="320" alt="Konsol modundaki panel">
+</p>
 
-## Gereksinimler
+## Kurulum
 
-- Windows 10 veya 11 (64 bit)
-- **DDC/CI destekleyen bir monitör.** Çoğu modern monitör destekler; monitörün kendi menüsünde **DDC/CI** ayarının **açık** olması gerekir (genelde "Sistem", "Kurulum" ya da "Diğer" menüsünde).
-- Bilgisayar monitöre kabloyla bağlı olmalı (HDMI, DisplayPort veya USB-C). Bazı USB yerleştirme istasyonları (dock) DDC/CI'yı iletmez.
+1. [Releases](https://github.com/amigohan/EkranGecis/releases/latest) sayfasından `EkranGecis.exe`'yi indir.
+2. Silmeyeceğin bir klasöre koy ve çalıştır.
+3. Windows "bilgisayarınızı korudu" derse **Ek bilgi → Yine de çalıştır**. Exe imzalı değil, o yüzden bu uyarı çıkıyor.
+4. İlk açılışta ayarlar geliyor. Bilgisayarın ve konsolun hangi girişte olduğunu seç, **Dene** ile kontrol et, kaydet.
 
-## Bilinen durumlar
+Monitörün menüsünde **DDC/CI** açık olmalı. Çoğu monitörde varsayılan olarak açık; değilse genelde "Sistem" ya da "Kurulum" menüsünde bulunuyor.
 
-- **Bazı monitörler girişi değiştirince bağlantıyı keser.** Bu durumda bilgisayardan geri dönmek mümkün olmaz; monitörün düğmesini kullanman gerekir. Ayarlardaki **Dene** butonu bunu güvenle test eder (5 saniye sonra kendiliğinden geri döner).
-- **Bazı LG ve Samsung modelleri** standart dışı giriş kodları kullanır; bu monitörlerde uygulama çalışmayabilir.
-- **Ses düzenleyici programlar** (ör. FxSound) kendilerini sürekli varsayılan ses cihazı yapar ve ses yönlendirmeyi geri alır. Uygulama bunu fark edip uyarı gösterir.
-- Bazı antivirüs programları kısayol dinleyen ve pencere taşıyan programlara şüpheyle bakabilir. Kaynak kod bu depoda; istersen kendin derleyebilirsin.
-- Sorun olursa **Ayarlar → Genel → Kayıt dosyası** ile ne olduğunu görebilirsin.
+## Bilmen gerekenler
 
-## Kaynaktan derleme
+- Her monitörde çalışmayabilir. Bazı monitörler girişi değiştirince bilgisayarla bağlantıyı kesiyor, o zaman geri dönmek için yine düğmeye basman gerekiyor. Ayarlardaki **Dene** butonu bunu güvenle test ediyor, 5 saniye sonra kendisi geri dönüyor.
+- Bazı LG ve Samsung modelleri standart dışı giriş kodları kullanıyor.
+- FxSound gibi ses programları kendini sürekli varsayılan cihaz yapıyor, ses yönlendirme o yüzden işe yaramayabilir.
+- Bir sorun olursa **Ayarlar → Genel → Kayıt dosyası**'na bak.
 
-[.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) gerekir.
+## Kendin derlemek istersen
+
+[.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) lazım:
 
 ```bash
 dotnet publish EkranGecis/EkranGecis.csproj -c Release -o dist
 ```
 
-Çıktı: `dist/EkranGecis.exe` (.NET kurulu olmayan bilgisayarlarda da çalışır).
-
-Yeni sürüm yayınlamak için `v1.2.3` biçiminde bir etiket gönderilir; GitHub Actions exe'yi derleyip Releases'a ekler.
+`v1.2.3` gibi bir etiket gönderince GitHub exe'yi kendisi derleyip Releases'a koyuyor.
 
 ## Lisans
 
 [MIT](LICENSE)
 
----
-
-Bu proje Nintendo, Sony, Microsoft veya ASUS ile bağlantılı değildir; ürün adları yalnızca örnek olarak geçer.
+Bu proje Nintendo, Sony, Microsoft ya da ASUS ile bağlantılı değil. Ürün adları sadece örnek olarak geçiyor.

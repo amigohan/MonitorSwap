@@ -6,3 +6,6 @@ publish/
 *.pdb
 *.user
 .vs/
+
+# Denemelik ses örnekleri
+ornek-sesler/

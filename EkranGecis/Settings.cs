@@ -50,9 +50,15 @@ sealed class AppSettings
     public bool MoveWindows { get; set; } = true;
     public bool ShowMiniPanel { get; set; } = true;
 
+    public string Theme { get; set; } = "Koyu";      // "Koyu" ya da "Macera" (ayarlardan açılır)
+    public bool SoundsEnabled { get; set; } = true;
+    public int SoundVolume { get; set; } = 70;         // 0–100
+    public bool ShowSplash { get; set; } = true;
+
     public Hotkey HotkeyPc { get; set; } = Hotkey.Of(CAS, Keys.D1);
     public Hotkey HotkeySwitch { get; set; } = Hotkey.Of(CAS, Keys.D2);
     public Hotkey HotkeyToggle { get; set; } = Hotkey.Of(CAS, Keys.D0);
+    public Hotkey HotkeySounds { get; set; } = Hotkey.Of(CAS, Keys.M);
 
     // ---------------- Kaydetme / yükleme ----------------
 
