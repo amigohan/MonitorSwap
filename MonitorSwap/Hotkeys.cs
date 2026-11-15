@@ -1,6 +1,6 @@
-using static EkranGecis.Native;
+﻿using static MonitorSwap.Native;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 /// <summary>Sistem genelinde kısayol tuşlarını dinleyen gizli pencere.</summary>
 sealed class HotkeyManager : NativeWindow, IDisposable

@@ -1,11 +1,11 @@
-namespace EkranGecis;
+﻿namespace MonitorSwap;
 
-/// <summary>Sorun giderme için %APPDATA%\EkranGecis\kayit.txt dosyasına kısa kayıtlar yazar.</summary>
+/// <summary>Sorun giderme için %APPDATA%\MonitorSwap\kayit.txt dosyasına kısa kayıtlar yazar.</summary>
 static class Log
 {
     static readonly object Gate = new();
     public static readonly string FilePath = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EkranGecis", "kayit.txt");
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MonitorSwap", "kayit.txt");
 
     public static void Write(string message)
     {

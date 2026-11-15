@@ -1,6 +1,6 @@
-using System.Reflection;
+﻿using System.Reflection;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 enum Mode { Unknown, Pc, Switch }
 
@@ -54,7 +54,7 @@ sealed class TrayApp : ApplicationContext
             new ToolStripMenuItem("Çıkış", null, (_, _) => Exit()),
         });
 
-        tray = new NotifyIcon { Icon = iconUnknown, Text = "EkranGeçiş", ContextMenuStrip = menu, Visible = true };
+        tray = new NotifyIcon { Icon = iconUnknown, Text = "Monitor Swap", ContextMenuStrip = menu, Visible = true };
         tray.MouseClick += (_, e) => { if (e.Button == MouseButtons.Left) ShowTrayMenu(); };
 
         // Açılış ekranı (Windows açılırken kendiliğinden başlatıldıysa gösterilmez)
@@ -92,13 +92,13 @@ sealed class TrayApp : ApplicationContext
             if (firstRun)
             {
                 settings.Save();
-                osd.Flash(CursorScreen(), "EkranGeçiş çalışıyor. Simgesi görev çubuğunun sağ köşesinde.", Theme.Pc, 4000);
+                osd.Flash(CursorScreen(), "Monitor Swap çalışıyor. Simgesi görev çubuğunun sağ köşesinde.", Theme.Pc, 4000);
                 OpenSettings();
             }
             else if (!autostart && !splash && v != NoValue)
             {
                 osd.Flash(CursorScreen(),
-                    "EkranGeçiş çalışıyor.  " + settings.DeviceName + ": " + settings.HotkeySwitch + "   •   Bilgisayar: " + settings.HotkeyPc,
+                    "Monitor Swap çalışıyor.  " + settings.DeviceName + ": " + settings.HotkeySwitch + "   •   Bilgisayar: " + settings.HotkeyPc,
                     Theme.Pc, 3500);
             }
             RunPending();
@@ -297,7 +297,7 @@ sealed class TrayApp : ApplicationContext
         string name = mode switch { Mode.Pc => "Bilgisayar", Mode.Switch => settings.DeviceName, _ => "bilinmiyor" };
         string input = lastInput.HasValue ? " (" + Ddc.InputName(lastInput.Value) + ")" : "";
         statusItem.Text = "Şu an: " + name + input;
-        tray.Text = Trim63("EkranGeçiş – " + name + input);
+        tray.Text = Trim63("Monitor Swap – " + name + input);
         tray.Icon = mode switch { Mode.Pc => iconPc, Mode.Switch => iconSw, _ => iconUnknown };
 
         pcItem.Text = "Bilgisayar (" + Ddc.InputName(settings.PcInput) + ")";

@@ -1,6 +1,6 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 /// <summary>Ayarlar penceresi: solda gezinme, sağda sayfalar, altta Kaydet / İptal.</summary>
 sealed class SettingsForm : Form
@@ -31,7 +31,7 @@ sealed class SettingsForm : Form
     public SettingsForm(AppSettings current)
     {
         s = current.Clone();
-        Text = "EkranGeçiş – Ayarlar";
+        Text = "Monitor Swap – Ayarlar";
         Icon = IconFactory.App();
         FormBorderStyle = FormBorderStyle.FixedSingle;
         MaximizeBox = false;
@@ -126,7 +126,7 @@ sealed class SettingsForm : Form
         general.Add(new Card(
             new SettingRow("Windows ile başlat", "Oturum açınca simge görev çubuğuna kendiliğinden gelir.", tglAuto),
             new SettingRow("Kayıt dosyası", "Bir şey ters giderse ne olduğunu buradan görebilirsin.", btnLog),
-            new SettingRow("Sürüm", "EkranGeçiş") { Value = Application.ProductVersion }));
+            new SettingRow("Sürüm", "Monitor Swap") { Value = Application.ProductVersion }));
 
         pages.AddRange(new[] { monitor, audio, windows, keys, general });
     }
@@ -365,7 +365,7 @@ sealed class Sidebar : DControl
     {
         // Logo
         IconFactory.DrawEmblem(g, new RectangleF(S(14), S(18), S(52), S(52)));
-        Draw.Text(g, "EkranGeçiş", Fonts.Subtitle(DeviceDpi), new Rectangle(S(72), S(22), Width - S(80), S(26)), Pal.Adventure ? Pal.Gold : Pal.Text);
+        Draw.Text(g, "Monitor Swap", Fonts.Subtitle(DeviceDpi), new Rectangle(S(72), S(22), Width - S(80), S(26)), Pal.Adventure ? Pal.Gold : Pal.Text);
 
         // Durum
         Color dot = detecting ? Pal.Neutral : model != null ? Pal.Success : Pal.Warning;

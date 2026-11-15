@@ -1,6 +1,6 @@
-using System.Text;
+﻿using System.Text;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 static class Program
 {
@@ -8,6 +8,7 @@ static class Program
     static void Main(string[] args)
     {
         ApplicationConfiguration.Initialize();
+        AppSettings.MigrateFromOldName();    // eski adla (EkranGeçiş) kaydedilmiş ayarları taşı
         Pal.Apply(AppSettings.Load().Theme); // pencereler oluşmadan önce tema seçilsin
 
         // Geliştirme/teşhis komutları (normal kullanımda gerekmez).
@@ -17,11 +18,11 @@ static class Program
         if (args.Length >= 2 && args[0] == "--make-icon") { IconFactory.SaveAppIco(args[1]); return; }
         if (args.Length >= 2 && args[0] == "--screenshots") { Screenshots(args[1]); return; }
 
-        using var mutex = new Mutex(true, @"Local\EkranGecis_TekKopya", out bool created);
+        using var mutex = new Mutex(true, @"Local\MonitorSwap_TekKopya", out bool created);
         if (!created)
         {
-            MessageBox.Show("EkranGeçiş zaten çalışıyor. Simgesi görev çubuğunun sağ köşesinde.",
-                "EkranGeçiş", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Monitor Swap zaten çalışıyor. Simgesi görev çubuğunun sağ köşesinde.",
+                "Monitor Swap", MessageBoxButtons.OK, MessageBoxIcon.Information);
             return;
         }
         Application.Run(new TrayApp(args.Contains("--autostart")));

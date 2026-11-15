@@ -1,7 +1,7 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 /// <summary>Win32 API tanımları (monitör, DDC/CI, pencereler, kısayollar).</summary>
 static class Native

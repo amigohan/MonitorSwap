@@ -1,9 +1,9 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Win32;
-using static EkranGecis.Native;
+using static MonitorSwap.Native;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 sealed class Hotkey
 {
@@ -63,7 +63,7 @@ sealed class AppSettings
     // ---------------- Kaydetme / yükleme ----------------
 
     static readonly string Dir = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EkranGecis");
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "MonitorSwap");
     static readonly string FilePath = Path.Combine(Dir, "ayarlar.json");
     static readonly JsonSerializerOptions Json = new() { WriteIndented = true };
 
@@ -86,13 +86,43 @@ sealed class AppSettings
         File.WriteAllText(FilePath, JsonSerializer.Serialize(this, Json));
     }
 
+    /// <summary>
+    /// Uygulamanın eski adı "EkranGeçiş" idi. Eski sürümden gelenlerin ayarları, kayıt dosyası ve
+    /// "Windows ile başlat" kaydı yeni ada (Monitor Swap) bir kez taşınır.
+    /// </summary>
+    public static void MigrateFromOldName()
+    {
+        try
+        {
+            string oldDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "EkranGecis");
+            if (Directory.Exists(oldDir) && !Directory.Exists(Dir))
+            {
+                Directory.CreateDirectory(Dir);
+                foreach (var f in Directory.GetFiles(oldDir))
+                    File.Copy(f, Path.Combine(Dir, Path.GetFileName(f)), overwrite: false);
+            }
+        }
+        catch { }
+
+        try
+        {
+            using var k = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
+            if (k?.GetValue("EkranGecis") is string)
+            {
+                k.DeleteValue("EkranGecis", false);
+                k.SetValue(RunName, "\"" + Environment.ProcessPath + "\" --autostart");
+            }
+        }
+        catch { }
+    }
+
     public AppSettings Clone() =>
         JsonSerializer.Deserialize<AppSettings>(JsonSerializer.Serialize(this, Json), Json);
 
     // ---------------- Windows ile başlat ----------------
 
     const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
-    const string RunName = "EkranGecis";
+    const string RunName = "MonitorSwap";
 
     public static bool Autostart
     {

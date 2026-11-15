@@ -1,4 +1,4 @@
-# EkranGeçiş
+﻿# Monitor Swap
 
 Laptopum monitöre DisplayPort ile bağlı, Switch de aynı monitörün HDMI girişinde. Her seferinde monitörün altındaki küçük düğmelere uzanıp menüde giriş aramaktan sıkıldım, bunu yazdım.
 
@@ -31,10 +31,12 @@ Bir kısayola basıyorsun, monitör konsola geçiyor. Bir daha basıyorsun, bilg
 
 ## Kurulum
 
-1. [Releases](https://github.com/amigohan/EkranGecis/releases/latest) sayfasından `EkranGecis.exe`'yi indir.
+1. [Releases](https://github.com/amigohan/MonitorSwap/releases/latest) sayfasından `MonitorSwap.exe`'yi indir.
 2. Silmeyeceğin bir klasöre koy ve çalıştır.
 3. Windows "bilgisayarınızı korudu" derse **Ek bilgi → Yine de çalıştır**. Exe imzalı değil, o yüzden bu uyarı çıkıyor.
 4. İlk açılışta ayarlar geliyor. Bilgisayarın ve konsolun hangi girişte olduğunu seç, **Dene** ile kontrol et, kaydet.
+
+Uygulamanın eski adı EkranGeçiş'ti. Eski sürümü kullanıyorsan yenisini açman yeterli; ayarların kendiliğinden taşınıyor. Eski `EkranGecis.exe`'yi silebilirsin.
 
 Monitörün menüsünde **DDC/CI** açık olmalı. Çoğu monitörde varsayılan olarak açık; değilse genelde "Sistem" ya da "Kurulum" menüsünde bulunuyor.
 
@@ -50,7 +52,7 @@ Monitörün menüsünde **DDC/CI** açık olmalı. Çoğu monitörde varsayılan
 [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) lazım:
 
 ```bash
-dotnet publish EkranGecis/EkranGecis.csproj -c Release -o dist
+dotnet publish MonitorSwap/MonitorSwap.csproj -c Release -o dist
 ```
 
 `v1.2.3` gibi bir etiket gönderince GitHub exe'yi kendisi derleyip Releases'a koyuyor.

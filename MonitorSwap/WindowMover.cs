@@ -1,8 +1,8 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Text;
-using static EkranGecis.Native;
+using static MonitorSwap.Native;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 /// <summary>
 /// Switch moduna geçerken ana monitördeki pencereleri laptop ekranına taşır,

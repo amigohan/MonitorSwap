@@ -1,7 +1,7 @@
-using System.Drawing.Drawing2D;
-using static EkranGecis.Native;
+﻿using System.Drawing.Drawing2D;
+using static MonitorSwap.Native;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 static class Theme
 {
@@ -592,7 +592,7 @@ sealed class Splash : FloatingForm
         IconFactory.DrawEmblem(g, new RectangleF((Width - size) / 2f, S(18), size, size));
 
         var ft = Pal.Adventure ? Fonts.Display(22f, DeviceDpi) : Fonts.Title(DeviceDpi);
-        Draw.Text(g, "EkranGeçiş", ft, new Rectangle(0, S(138), Width, S(40)), Pal.Adventure ? Pal.Gold : Pal.Text,
+        Draw.Text(g, "Monitor Swap", ft, new Rectangle(0, S(138), Width, S(40)), Pal.Adventure ? Pal.Gold : Pal.Text,
             TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine);
         Ornament.Divider(g, (Width - S(180)) / 2, S(188), S(180), DeviceDpi / 96f);
         Draw.Text(g, "Bilgisayar ile konsol arasında tek tuşla geçiş", Fonts.Caption(DeviceDpi), new Rectangle(0, S(200), Width, S(24)), Pal.TextDim,

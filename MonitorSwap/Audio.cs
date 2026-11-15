@@ -1,6 +1,6 @@
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 /// <summary>Windows ses çıkış cihazlarını listeler ve varsayılan cihazı değiştirir.</summary>
 static class Audio

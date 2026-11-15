@@ -1,6 +1,6 @@
-using System.Media;
+﻿using System.Media;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 enum Sound { KonsolaGecis, BilgisayaraDonus, OtomatikDonus, Hata, Acilis }
 
@@ -16,7 +16,7 @@ static class Sfx
     static readonly SoundPlayer Player = new();
     static readonly Dictionary<Sound, byte[]> Cache = new();
 
-    static string ResourceName(Sound s) => "EkranGecis.Sounds." + s switch
+    static string ResourceName(Sound s) => "MonitorSwap.Sounds." + s switch
     {
         Sound.KonsolaGecis => "konsola-gecis.wav",
         Sound.BilgisayaraDonus => "bilgisayara-donus.wav",

@@ -1,7 +1,7 @@
-using System.Text;
-using static EkranGecis.Native;
+﻿using System.Text;
+using static MonitorSwap.Native;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 /// <summary>
 /// Monitöre DDC/CI üzerinden komut gönderir. VCP 0x60 = giriş kaynağı.

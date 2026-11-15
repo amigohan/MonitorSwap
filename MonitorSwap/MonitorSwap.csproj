@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -7,8 +7,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
-    <AssemblyName>EkranGecis</AssemblyName>
-    <RootNamespace>EkranGecis</RootNamespace>
+    <AssemblyName>MonitorSwap</AssemblyName>
+    <RootNamespace>MonitorSwap</RootNamespace>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <!-- .NET kurulu olmayan bilgisayarlarda da çalışsın diye her şey tek exe'nin içinde -->
     <SelfContained>true</SelfContained>
@@ -16,10 +16,10 @@
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <ApplicationIcon>app.ico</ApplicationIcon>
-    <Product>EkranGeçiş</Product>
-    <AssemblyTitle>EkranGeçiş</AssemblyTitle>
+    <Product>Monitor Swap</Product>
+    <AssemblyTitle>Monitor Swap</AssemblyTitle>
     <Description>Monitör girişini bilgisayar ile konsol arasında tek tuşla değiştirir.</Description>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <!-- Exe'ye derleyen bilgisayarın klasör yolları (kullanıcı adı dahil) gömülmesin -->
     <DebugType>none</DebugType>
@@ -29,9 +29,9 @@
 
   <ItemGroup>
     <!-- Kodla üretilmiş özgün efekt sesleri -->
-    <EmbeddedResource Include="Sounds\*.wav" LogicalName="EkranGecis.Sounds.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Sounds\*.wav" LogicalName="MonitorSwap.Sounds.%(Filename)%(Extension)" />
     <!-- Macera teması başlık fontu (SIL Open Font License, bkz. Fonts\OFL.txt). Dosya yoksa Segoe UI kullanılır. -->
-    <EmbeddedResource Include="Fonts\*.ttf" LogicalName="EkranGecis.Fonts.%(Filename)%(Extension)" Condition="Exists('Fonts')" />
+    <EmbeddedResource Include="Fonts\*.ttf" LogicalName="MonitorSwap.Fonts.%(Filename)%(Extension)" Condition="Exists('Fonts')" />
   </ItemGroup>
 
 </Project>

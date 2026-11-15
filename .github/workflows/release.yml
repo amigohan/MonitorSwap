@@ -1,4 +1,4 @@
-# "v1.2.3" biçiminde bir etiket gönderildiğinde exe'yi derler ve GitHub Releases'a yükler.
+﻿# "v1.2.3" biçiminde bir etiket gönderildiğinde exe'yi derler ve GitHub Releases'a yükler.
 name: Sürüm yayınla
 
 on:
@@ -22,10 +22,10 @@ jobs:
         shell: pwsh
         run: |
           $version = "${{ github.ref_name }}".TrimStart("v")
-          dotnet publish EkranGecis/EkranGecis.csproj -c Release -o dist -p:Version=$version
+          dotnet publish MonitorSwap/MonitorSwap.csproj -c Release -o dist -p:Version=$version
 
       - name: Sürümü oluştur
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" dist/EkranGecis.exe --title "EkranGeçiş ${{ github.ref_name }}" --generate-notes
+        run: gh release create "${{ github.ref_name }}" dist/MonitorSwap.exe --title "Monitor Swap ${{ github.ref_name }}" --generate-notes

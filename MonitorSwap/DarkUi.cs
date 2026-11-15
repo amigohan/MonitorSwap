@@ -1,8 +1,8 @@
-using System.Drawing.Drawing2D;
+﻿using System.Drawing.Drawing2D;
 using System.Drawing.Text;
 using System.Runtime.InteropServices;
 
-namespace EkranGecis;
+namespace MonitorSwap;
 
 // =====================================================================
 //  Tasarım belirteçleri: renkler, yazı tipleri, ikonlar
@@ -105,7 +105,7 @@ static class Fonts
     {
         try
         {
-            using var s = typeof(Fonts).Assembly.GetManifestResourceStream("EkranGecis.Fonts.Almendra-Bold.ttf");
+            using var s = typeof(Fonts).Assembly.GetManifestResourceStream("MonitorSwap.Fonts.Almendra-Bold.ttf");
             if (s == null) return;
             var data = new byte[s.Length];
             s.ReadExactly(data);
